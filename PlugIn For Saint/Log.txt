@@ -1,0 +1,20 @@
+code modify log:
+
+date format---MM/DD/YYYY
+
+12/6/2016  add ODI "RearCrossTrafficAlertOptions" initialization (FUID=47 ODIIndication ID=2) in "Function_FUCLASS47_Initialization()"
+           add "FUClass47[2] = 0" initialization in "Function_FUCLASS47_ValueSetting(WPARAM wParam, LPARAM lParam)"
+           add ODI "RearCrossTrafficAlertOptions" signal setting (FUID=47 ODIIndication ID=2) in "Function_FUCLASS47_ValueSetting(WPARAM wParam, LPARAM lParam)"
+
+12/9/2016  update the vision VS 2012 mfc to VS 2013 mfc library, enable build and debug operation, So this solution could compile in VS 2013 without error
+           add "Public Parameter.cpp" and "SBEConnection.cpp" in "PlugIn For Saint" project
+		   modify codes related with the fuctions of "Public Parameter.cpp" and "SBEConnection.cpp"
+
+12/12/2016 add ODI "PollutionControlPresent" initialization (FUID=42 ODIIndication ID=12) in "Function_FUCLASS42_Initialization()"
+           add "FUClass42[11] = 0" initialization in "Function_FUCLASS42_ValueSetting(WPARAM wParam, LPARAM lParam)"
+           add ODI "PollutionControlPresent" signal setting (FUID=42 ODIIndication ID=12) in "Function_FUCLASS42_ValueSetting(WPARAM wParam, LPARAM lParam)"
+		   
+		   modify simulator vision to 1.9.1
+		   modify simulator name NGK Simulator For 358CT
+		   change IDD name in IDD_PLUGINFORSAINT_DIALOG
+
