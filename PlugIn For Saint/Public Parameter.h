@@ -5,12 +5,18 @@
 
 #define Node_Alive								1
 #define T_Periodic_100							4
-#define T_Periodic_250                          11
 #define T_Periodic_500							5
-#define T_Periodic_10							7
 #define T_Periodic_5000							8
-#define T_Periodic_10min					    9
 #define T_Periodic_10s                          10
+
+#define mmTime_10								10
+#define mmTime_100								100
+#define mmTime_500								500
+#define mmTime_640								640
+#define mmTime_1000								1000
+#define mmTime_5000								5000
+#define mmTime_10000							10000
+
 #define DIAGNOSTIC_COMMAND						6
 #define MAX_DEVICES								32
 #define MESSAGE_DEVICE_CALLBACK					5001
@@ -79,6 +85,9 @@
 #define T_Periodic_640	                        9054   
 #define MESSAGE_NMPDU_Send                      9055
 #define T_Periodic_9							9056
+#define Msg_thread_stop							9057
+#define Msg_thread_timer_start					9058
+#define Msg_thread_001							9059
 
 class PublicParama
 {

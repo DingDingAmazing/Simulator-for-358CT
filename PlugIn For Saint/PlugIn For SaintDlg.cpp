@@ -12,6 +12,8 @@
 #include "DIDFrame.h"
 #include<iostream>
 #include "string"
+#pragma comment(lib,"winmm")
+
 using std::string;
 static int Network_count2=0;
 #define ITEM_NUM 14
@@ -36,6 +38,7 @@ int Length_Buff = 0;
 CString PITS_Check = "";
 CString PITS_Value = "";
 int DTC_Sample[35];
+int Thread_one = 0;
 // CPlugInForSaintDlg dialog
 
 CPlugInForSaintDlg::CPlugInForSaintDlg(CWnd* pParent /*=NULL*/)
@@ -180,6 +183,8 @@ BOOL CPlugInForSaintDlg::OnInitDialog()
 	InitializeConnection();
 	
 	FormFunc.Function_Initialize();
+
+	//pThread_cycleMsg = AfxBeginThread(ThreadFunc, this);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -981,9 +986,18 @@ HRESULT CPlugInForSaintDlg::Function_Network_Send(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+MMRESULT m_idEvent;
+UINT m_idEvent_1;
+UINT m_idEvent_2;
+UINT m_idEvent_3;
+UINT m_idEvent_4;
+UINT m_idEvent_5;
+UINT m_idEvent_6;
+
 HRESULT CPlugInForSaintDlg::Function_PPEI_Platform_General_Status(WPARAM wParam, LPARAM lParam)
 {		
-	
+	//MMRESULT m_idEvent;
+	//UINT m_idEvent_1;
 	if(!Flag_Wake2)
 	{
 			if(FormFunc.Ctrl_MainForm->Bar_SysPwrMd->Value != 0)
@@ -996,16 +1010,18 @@ HRESULT CPlugInForSaintDlg::Function_PPEI_Platform_General_Status(WPARAM wParam,
 	}
   if(FormFunc.Ctrl_MainForm->Bar_SysPwrMd->Value == 0)
 	{       
-		    
+		  
+		//::PostThreadMessage(pThread_cycleMsg->m_nThreadID, Msg_thread_stop, 0, 0);
 		    Flag_Sleep = true;
 			Flag_Wake2 = false;
+			timeKillEvent(m_idEvent);
+			timeEndPeriod(mmTime_10);
+
 			KillTimer(Node_Alive);
 			KillTimer(T_Periodic_100);
 			KillTimer(T_Periodic_500);
 			KillTimer(T_Periodic_640);
-			KillTimer(T_Periodic_10);
 			KillTimer(T_Periodic_5000);
-		  //KillTimer(T_Periodic_10min);
     }
 
 	if(!FormFunc.Ctrl_MainForm->Box_PMEnable->Checked)
@@ -1013,12 +1029,20 @@ HRESULT CPlugInForSaintDlg::Function_PPEI_Platform_General_Status(WPARAM wParam,
 		Flag_Sleep = false;
 		if(!Flag_Wake)
 		{  
-	 		SetTimer(Node_Alive,1000,NULL);
-			SetTimer(T_Periodic_100,100,NULL);
-			SetTimer(T_Periodic_500,500,NULL);
-			SetTimer(T_Periodic_640,640,NULL);
-			SetTimer(T_Periodic_9,9,NULL);
-			SetTimer(T_Periodic_5000,5000,NULL);
+			//::PostThreadMessage(pThread_cycleMsg->m_nThreadID, Msg_thread_timer_start, 0, 0);
+			m_idEvent = timeSetEvent(mmTime_10, 1, TimerCallBackFun, (DWORD)this, TIME_PERIODIC);
+			m_idEvent_1 = timeSetEvent(mmTime_100, 1, TimerCallBackFun_1, (DWORD)this, TIME_PERIODIC);
+			m_idEvent_2 = timeSetEvent(mmTime_500, 1, TimerCallBackFun_2, (DWORD)this, TIME_PERIODIC);
+			m_idEvent_3 = timeSetEvent(mmTime_640, 1, TimerCallBackFun_3, (DWORD)this, TIME_PERIODIC);
+			m_idEvent_4 = timeSetEvent(mmTime_1000, 1, TimerCallBackFun_4, (DWORD)this, TIME_PERIODIC);
+			m_idEvent_5 = timeSetEvent(mmTime_5000, 1, TimerCallBackFun_5, (DWORD)this, TIME_PERIODIC);
+
+	 	//	SetTimer(Node_Alive,1000,NULL);
+			//SetTimer(T_Periodic_100,100,NULL);
+			//SetTimer(T_Periodic_500,500,NULL);
+			//SetTimer(T_Periodic_640,640,NULL);
+			//SetTimer(T_Periodic_9,9,NULL);
+			//SetTimer(T_Periodic_5000,5000,NULL);
 			Flag_Wake = true;
 			
 		}
@@ -1260,9 +1284,7 @@ HRESULT CPlugInForSaintDlg::Function_Door_Action(WPARAM wParam, LPARAM lParam)
 			KillTimer(T_Periodic_100);
 			KillTimer(T_Periodic_500);
 			KillTimer(T_Periodic_640);
-			KillTimer(T_Periodic_10);
 			KillTimer(T_Periodic_5000);
-			KillTimer(T_Periodic_10min);
 			
 		}*/	
 	//}
@@ -1273,6 +1295,7 @@ HRESULT CPlugInForSaintDlg::Function_Door_Action(WPARAM wParam, LPARAM lParam)
 void CPlugInForSaintDlg::OnClose()
 {
 	Function_Send_Command("087001");
+	//::PostThreadMessage(pThread_cycleMsg->m_nThreadID, Msg_thread_stop, 0, 0);
 	DestroyWindow();     
 }
 
@@ -1338,9 +1361,6 @@ void CPlugInForSaintDlg::OnTimer(UINT_PTR nIDEvent)
 		Function_PPEI_Platform_General_Status(0,0);
 		
 		break;
-	case T_Periodic_250:
-		Function_Vehicle_State_Management_BB(0,0);
-		break;
 	case T_Periodic_500:
 
 		Function_Battery_Voltage(0,0);
@@ -1366,11 +1386,6 @@ void CPlugInForSaintDlg::OnTimer(UINT_PTR nIDEvent)
 		}
 		break;
 
-	case T_Periodic_10:
-		
-		Function_PPEI_Steering_Wheel_Angle(0,0);
-		
-		break;
 	case T_Periodic_640:
 		//Function_Network_Management_Gateway_BB(0,0);
 		Function_Send_Command("58 06 27 00 40 04 3A 33 00 00 00");
@@ -1379,21 +1394,6 @@ void CPlugInForSaintDlg::OnTimer(UINT_PTR nIDEvent)
 		Function_PPEI_VIN_Digits_10_to_17(0,0);
 		Function_VIN_Digits_2_to_9_HS(0,0);
 		break;
-   /* case T_Periodic_10min:
-		Flag_Sleep = true;
-		Flag_Wake = false;
-		Flag_Wake2 = false;
-		Function_Send_Command("08 70 01");
-		KillTimer(Node_Alive);
-		KillTimer(T_Periodic_100);
-		KillTimer(T_Periodic_500);
-		KillTimer(T_Periodic_640);
-		KillTimer(T_Periodic_10);
-		KillTimer(T_Periodic_5000);
-		KillTimer(T_Periodic_10min);
-		Flag_ODI = false;
-	    break;
-	 */
 	case T_Periodic_10s:
 		::SendMessage(AfxGetApp()->GetMainWnd()->GetSafeHwnd(),MESSAGE_DTC_READ,0,0);
 		break;
@@ -3778,14 +3778,6 @@ void CPlugInForSaintDlg::Function_PITS_Restore()
 	}
 }
 
-void CPlugInForSaintDlg::timestart(int value)
-{
-	if(value == 0)
-	{
-		//SetTimer(T_Periodic_10min,600000,NULL);
-	}
-}
-
 HRESULT CPlugInForSaintDlg::Function_Export(WPARAM wParam, LPARAM lParam)
 {
 
@@ -3818,4 +3810,165 @@ HRESULT CPlugInForSaintDlg::Function_Export(WPARAM wParam, LPARAM lParam)
 	fclose(fp);
 
 	return 0;
+}
+
+UINT ThreadFunc(LPVOID pParam)
+{
+	CPlugInForSaintDlg* p = (CPlugInForSaintDlg*)pParam;
+	MSG msg_thread1;
+	UINT_PTR nIDEvent1;
+	while (1)
+	{
+		while (PeekMessage(&msg_thread1, NULL, 0, 0, PM_REMOVE))
+		{
+			if (msg_thread1.message == Msg_thread_stop)
+			{
+				PublicParama::Function_Send_Command("58 02 22 02 02 02 02 02 02 02 02");
+				Thread_one = 0;
+				return 0;
+			}
+			if (msg_thread1.message == Msg_thread_timer_start)
+			{
+				PublicParama::Function_Send_Command("58 01 11 01 01 01 01 01 01 01 01");
+				Thread_one = 1;
+			}
+			if (msg_thread1.message == Msg_thread_001)
+			{
+				PublicParama::Function_Send_Command("58 01 11 01 01 01 01 01 01 01 01");
+			}
+			else
+			{
+				DispatchMessage(&msg_thread1);
+			}
+			//::Function_Antilock_Brake_and_TC_Status_HS(0, 0);
+		}
+		
+		//if (Thread_one == 1)
+		//{
+		//	PublicParama::Function_Send_Command("58 01 11 01 01 01 01 01 01 01 01");
+		//	Sleep(1000);
+		//}
+	}
+	return 0;
+}
+
+void CALLBACK TimerCallBackFun(UINT wTimerID, UINT msg, DWORD dwUser, DWORD dwl, DWORD dw2)
+{
+	CPlugInForSaintDlg* pThis = (CPlugInForSaintDlg*)dwUser;
+	pThis->MMTimerHandler(wTimerID);
+}
+
+void CALLBACK TimerCallBackFun_1(UINT wTimerID, UINT msg, DWORD dwUser, DWORD dwl, DWORD dw2)
+{
+	CPlugInForSaintDlg* pThis = (CPlugInForSaintDlg*)dwUser;
+	pThis->MMTimerHandler_1(wTimerID);
+}
+
+void CALLBACK TimerCallBackFun_2(UINT wTimerID, UINT msg, DWORD dwUser, DWORD dwl, DWORD dw2)
+{
+	CPlugInForSaintDlg* pThis = (CPlugInForSaintDlg*)dwUser;
+	pThis->MMTimerHandler_2(wTimerID);
+}
+
+void CALLBACK TimerCallBackFun_3(UINT wTimerID, UINT msg, DWORD dwUser, DWORD dwl, DWORD dw2)
+{
+	CPlugInForSaintDlg* pThis = (CPlugInForSaintDlg*)dwUser;
+	pThis->MMTimerHandler_3(wTimerID);
+}
+
+void CALLBACK TimerCallBackFun_4(UINT wTimerID, UINT msg, DWORD dwUser, DWORD dwl, DWORD dw2)
+{
+	CPlugInForSaintDlg* pThis = (CPlugInForSaintDlg*)dwUser;
+	pThis->MMTimerHandler_4(wTimerID);
+}
+
+void CALLBACK TimerCallBackFun_5(UINT wTimerID, UINT msg, DWORD dwUser, DWORD dwl, DWORD dw2)
+{
+	CPlugInForSaintDlg* pThis = (CPlugInForSaintDlg*)dwUser;
+	pThis->MMTimerHandler_5(wTimerID);
+}
+
+void CALLBACK TimerCallBackFun_6(UINT wTimerID, UINT msg, DWORD dwUser, DWORD dwl, DWORD dw2)
+{
+	CPlugInForSaintDlg* pThis = (CPlugInForSaintDlg*)dwUser;
+	pThis->MMTimerHandler_6(wTimerID);
+}
+
+void CPlugInForSaintDlg::MMTimerHandler(UINT nIDEvent)
+{
+	//Function_Send_Command("58 01 11 01 01 01 01 01 01 01 01");
+	if (Network_count2 < 5)
+	{
+		Function_Send_Command("58 06 27 00 40 04 3A 33 00 00 00");
+		Network_count2++;
+	}
+
+	if (Network_count2 == 5 && !FormFunc.Ctrl_SettingForm->Box_NMPDU_Send->Checked)
+	{
+		Function_Reload_DataBase();
+
+		Function_Write_DataBase(PPEI_Platform_General_Status::SysPwrMd::Start_Bit, PPEI_Platform_General_Status::SysPwrMd::Length, FormFunc.Ctrl_MainForm->Bar_SysPwrMd->Value);
+
+		Function_Build_Command(PPEI_Platform_General_Status::Basic::Message_ID, 1);
+
+		Network_count2++;
+	}
+}
+
+void CPlugInForSaintDlg::MMTimerHandler_1(UINT nIDEvent)
+{
+	//Function_Send_Command("58 02 22 02 02 02 02 02 02 02 02");
+	Function_Antilock_Brake_and_TC_Status_HS(0, 0);
+	Function_System_Power_Mode_Backup_BB(0, 0);
+	Function_PPEI_Vehicle_Speed_and_Distance(0, 0);
+	Function_PPEI_Platform_General_Status(0, 0);
+}
+
+void CPlugInForSaintDlg::MMTimerHandler_2(UINT nIDEvent)
+{
+	Function_Battery_Voltage(0, 0);
+}
+
+void CPlugInForSaintDlg::MMTimerHandler_3(UINT nIDEvent)
+{
+	Function_Send_Command("58 06 27 00 40 04 3A 33 00 00 00");
+}
+
+void CPlugInForSaintDlg::MMTimerHandler_4(UINT nIDEvent)
+{
+	if (NodeFunc.Ctrl_NodeForm->Box_APAPr->Checked)
+	{
+		Function_Send_Command("58 06 39 01");
+	}
+	if (NodeFunc.Ctrl_NodeForm->Box_ECCPr->Checked)
+	{
+		Function_Send_Command("58 06 80 01");
+	}
+	if (NodeFunc.Ctrl_NodeForm->Box_InfoFaceplatePr->Checked)
+	{
+		Function_Send_Command("5B 06 71 01");
+	}
+	if (NodeFunc.Ctrl_NodeForm->Box_IPCPr->Checked)
+	{
+		Function_Send_Command("58 06 76 01");
+	}
+	if (NodeFunc.Ctrl_NodeForm->Box_OnstarPr->Checked)
+	{
+		Function_Send_Command("58 06 29 01");
+	}
+	if (NodeFunc.Ctrl_NodeForm->Box_SDMPr->Checked)
+	{
+		Function_Send_Command("58 06 87 01");
+	}
+}
+
+void CPlugInForSaintDlg::MMTimerHandler_5(UINT nIDEvent)
+{
+	Function_PPEI_VIN_Digits_10_to_17(0, 0);
+	Function_VIN_Digits_2_to_9_HS(0, 0);
+}
+
+void CPlugInForSaintDlg::MMTimerHandler_6(UINT nIDEvent)
+{
+
 }

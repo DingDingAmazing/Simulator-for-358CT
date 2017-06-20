@@ -9,13 +9,21 @@
 #include "DTCFRAME.h"
 #include "HVACFrame.h"
 #include "FormControl.h"
-
-#include "Public Parameter.h"
+#include "mmsystem.h"
 
 
 //#include "KeyBoard Form.h"
 #pragma once
 typedef unsigned int UINT;
+UINT ThreadFunc(LPVOID pParam);
+
+void CALLBACK TimerCallBackFun(UINT wTimerID, UINT msg, DWORD dwUser, DWORD dwl, DWORD dw2);
+void CALLBACK TimerCallBackFun_1(UINT wTimerID, UINT msg, DWORD dwUser, DWORD dwl, DWORD dw2);
+void CALLBACK TimerCallBackFun_2(UINT wTimerID, UINT msg, DWORD dwUser, DWORD dwl, DWORD dw2);
+void CALLBACK TimerCallBackFun_3(UINT wTimerID, UINT msg, DWORD dwUser, DWORD dwl, DWORD dw2);
+void CALLBACK TimerCallBackFun_4(UINT wTimerID, UINT msg, DWORD dwUser, DWORD dwl, DWORD dw2);
+void CALLBACK TimerCallBackFun_5(UINT wTimerID, UINT msg, DWORD dwUser, DWORD dwl, DWORD dw2);
+void CALLBACK TimerCallBackFun_6(UINT wTimerID, UINT msg, DWORD dwUser, DWORD dwl, DWORD dw2);
 
 struct Data_Information
 {
@@ -150,8 +158,16 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
-	void timestart(int value);
 	virtual void OnOK();
 	virtual void OnCancel();
 
+public:
+	CWinThread* pThread_cycleMsg;
+	void MMTimerHandler(UINT nIDEvent);
+	void MMTimerHandler_1(UINT nIDEvent);
+	void MMTimerHandler_2(UINT nIDEvent);
+	void MMTimerHandler_3(UINT nIDEvent);
+	void MMTimerHandler_4(UINT nIDEvent);
+	void MMTimerHandler_5(UINT nIDEvent);
+	void MMTimerHandler_6(UINT nIDEvent);
 };
