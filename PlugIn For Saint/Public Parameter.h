@@ -2,13 +2,6 @@
 #define _shape_
 
 #include "SBEConnection.h"	
-
-#define Node_Alive								1
-#define T_Periodic_100							4
-#define T_Periodic_500							5
-#define T_Periodic_5000							8
-#define T_Periodic_10s                          10
-
 #define mmTime_10								10
 #define mmTime_100								100
 #define mmTime_500								500
@@ -82,9 +75,8 @@
 #define MESSAGE_Power_Mode_Infor	            9050
 #define MESSAGE_Dimming_Information_BB          9051
 #define MESSAGE_Network_Management_Gateway_BB   9053 
-#define T_Periodic_640	                        9054   
 #define MESSAGE_NMPDU_Send                      9055
-#define T_Periodic_9							9056
+
 #define Msg_thread_stop							9057
 #define Msg_thread_timer_start					9058
 #define Msg_thread_001							9059

@@ -969,24 +969,20 @@ HRESULT CPlugInForSaintDlg::Function_PPEI_Engine_General_Status_5(WPARAM wParam,
 	return 0;
 }
 
+MMRESULT m_idEvent;
+
 HRESULT CPlugInForSaintDlg::Function_Network_Send(WPARAM wParam, LPARAM lParam)
 {
 	if(FormFunc.Ctrl_SettingForm->Box_NMPDU_Send->Checked)
 	{   
-		KillTimer(T_Periodic_100);
-		SetTimer(T_Periodic_640,640,NULL);
-		SetTimer(T_Periodic_9,9,NULL);
+		if(m_idEvent == 0)
+			m_idEvent = timeSetEvent(mmTime_10, 1, TimerCallBackFun, (DWORD)this, TIME_PERIODIC);
 	}
-	else
-	{
-		//KillTimer(T_Periodic_640);
-		//KillTimer(T_Periodic_9);
-		SetTimer(T_Periodic_100,100,NULL);
-	}
+
 	return 0;
 }
 
-MMRESULT m_idEvent;
+
 UINT m_idEvent_1;
 UINT m_idEvent_2;
 UINT m_idEvent_3;
@@ -1014,14 +1010,21 @@ HRESULT CPlugInForSaintDlg::Function_PPEI_Platform_General_Status(WPARAM wParam,
 		//::PostThreadMessage(pThread_cycleMsg->m_nThreadID, Msg_thread_stop, 0, 0);
 		    Flag_Sleep = true;
 			Flag_Wake2 = false;
-			timeKillEvent(m_idEvent);
-			timeEndPeriod(mmTime_10);
 
-			KillTimer(Node_Alive);
-			KillTimer(T_Periodic_100);
-			KillTimer(T_Periodic_500);
-			KillTimer(T_Periodic_640);
-			KillTimer(T_Periodic_5000);
+			timeKillEvent(m_idEvent_1);
+			timeEndPeriod(mmTime_100);
+
+			timeKillEvent(m_idEvent_2);
+			timeEndPeriod(mmTime_500);
+
+			timeKillEvent(m_idEvent_3);
+			timeEndPeriod(mmTime_640);
+
+			timeKillEvent(m_idEvent_4);
+			timeEndPeriod(mmTime_1000);
+
+			timeKillEvent(m_idEvent_5);
+			timeEndPeriod(mmTime_5000);
     }
 
 	if(!FormFunc.Ctrl_MainForm->Box_PMEnable->Checked)
@@ -1037,12 +1040,6 @@ HRESULT CPlugInForSaintDlg::Function_PPEI_Platform_General_Status(WPARAM wParam,
 			m_idEvent_4 = timeSetEvent(mmTime_1000, 1, TimerCallBackFun_4, (DWORD)this, TIME_PERIODIC);
 			m_idEvent_5 = timeSetEvent(mmTime_5000, 1, TimerCallBackFun_5, (DWORD)this, TIME_PERIODIC);
 
-	 	//	SetTimer(Node_Alive,1000,NULL);
-			//SetTimer(T_Periodic_100,100,NULL);
-			//SetTimer(T_Periodic_500,500,NULL);
-			//SetTimer(T_Periodic_640,640,NULL);
-			//SetTimer(T_Periodic_9,9,NULL);
-			//SetTimer(T_Periodic_5000,5000,NULL);
 			Flag_Wake = true;
 			
 		}
@@ -1271,23 +1268,6 @@ HRESULT CPlugInForSaintDlg::Function_DTCRead_Active(WPARAM wParam, LPARAM lParam
 HRESULT CPlugInForSaintDlg::Function_Door_Action(WPARAM wParam, LPARAM lParam)
 {
 	  Function_Driver_Door_Status(0,0);
-	 
-	//if((!FormFunc.Ctrl_MainForm->Box_PMEnable->Checked) && (FormFunc.Ctrl_MainForm->Bar_SysPwrMd->Value == 0) && (FormFunc.Ctrl_MainForm->Bar_DDAjrSwAtv->Value == 1))
-	//{
-		//Network_count2= 0;
-		/*Function_Send_Command("08 70 01");
-		if(!Flag_Sleep)
-		{
-			Flag_Sleep = true;
-			Flag_Wake = false;
-			KillTimer(Node_Alive);
-			KillTimer(T_Periodic_100);
-			KillTimer(T_Periodic_500);
-			KillTimer(T_Periodic_640);
-			KillTimer(T_Periodic_5000);
-			
-		}*/	
-	//}
 	
 	return 0;
 }
@@ -1297,110 +1277,6 @@ void CPlugInForSaintDlg::OnClose()
 	Function_Send_Command("087001");
 	//::PostThreadMessage(pThread_cycleMsg->m_nThreadID, Msg_thread_stop, 0, 0);
 	DestroyWindow();     
-}
-
-void CPlugInForSaintDlg::OnTimer(UINT_PTR nIDEvent)
-{
-	switch(nIDEvent) 
-	{
-	case Node_Alive:
-		if(NodeFunc.Ctrl_NodeForm->Box_APAPr->Checked)
-		{
-			Function_Send_Command("58 06 39 01");
-		}
-		else
-		{
-			//Function_Send_Command("58 06 39 00");
-		}
-		if(NodeFunc.Ctrl_NodeForm->Box_ECCPr->Checked)
-		{
-			Function_Send_Command("58 06 80 01");
-		}
-		else
-		{
-			//Function_Send_Command("58 06 33 00");
-		}
-		if (NodeFunc.Ctrl_NodeForm->Box_InfoFaceplatePr->Checked)
-		{
-			Function_Send_Command("5B 06 71 01");
-		} 
-		else
-		{
-			//Function_Send_Command("58 06 3F 00");
-		}
-		if (NodeFunc.Ctrl_NodeForm->Box_IPCPr->Checked)
-		{
-			Function_Send_Command("58 06 76 01");
-		} 
-		else
-		{
-			//Function_Send_Command("58 06 2C 00");
-		}
-		if (NodeFunc.Ctrl_NodeForm->Box_OnstarPr->Checked)
-		{
-			Function_Send_Command("58 06 29 01");
-		} 
-		else
-		{
-			//Function_Send_Command("58 06 29 00");
-		}
-		if (NodeFunc.Ctrl_NodeForm->Box_SDMPr->Checked)
-		{
-			Function_Send_Command("58 06 87 01");
-		} 
-		else
-		{
-			//Function_Send_Command("58 06 27 00");
-		}
-		break;
-	case T_Periodic_100:
-		Function_Antilock_Brake_and_TC_Status_HS(0,0);
-		//Function_Body_Information_2_HS(0,0);
-		Function_System_Power_Mode_Backup_BB(0,0);
-		Function_PPEI_Vehicle_Speed_and_Distance(0,0);
-		Function_PPEI_Platform_General_Status(0,0);
-		
-		break;
-	case T_Periodic_500:
-
-		Function_Battery_Voltage(0,0);
-		break;
-	case T_Periodic_9:
-
-		if(Network_count2 < 5)
-		{
-			//Function_Network_Management_Gateway_BB(0,0);
-			Function_Send_Command("58 06 27 00 40 04 3A 33 00 00 00");
-			Network_count2 ++ ;
-		}
-
-		if(Network_count2 == 5 && !FormFunc.Ctrl_SettingForm->Box_NMPDU_Send->Checked)
-		{
-			Function_Reload_DataBase();
-
-            Function_Write_DataBase(PPEI_Platform_General_Status::SysPwrMd::Start_Bit,PPEI_Platform_General_Status::SysPwrMd::Length,FormFunc.Ctrl_MainForm->Bar_SysPwrMd->Value);
-
-		    Function_Build_Command(PPEI_Platform_General_Status::Basic::Message_ID,1);
-
-			Network_count2 ++ ;
-		}
-		break;
-
-	case T_Periodic_640:
-		//Function_Network_Management_Gateway_BB(0,0);
-		Function_Send_Command("58 06 27 00 40 04 3A 33 00 00 00");
-		break;
-	case T_Periodic_5000:
-		Function_PPEI_VIN_Digits_10_to_17(0,0);
-		Function_VIN_Digits_2_to_9_HS(0,0);
-		break;
-	case T_Periodic_10s:
-		::SendMessage(AfxGetApp()->GetMainWnd()->GetSafeHwnd(),MESSAGE_DTC_READ,0,0);
-		break;
-	default:
-		break;
-	}
-	CDialogEx::OnTimer(nIDEvent);
 }
 
 HRESULT CPlugInForSaintDlg::Function_HVAC_DynData(WPARAM wParam, LPARAM lParam)
@@ -1777,11 +1653,12 @@ HRESULT CPlugInForSaintDlg::Function_DTC_Read(WPARAM wParam, LPARAM lParam)
 	{
 		if(FormFunc.Ctrl_DTCForm.GetControl()->Box_AutoCompare->Checked)
 		{
-			SetTimer(T_Periodic_10s,10000,NULL);
+			m_idEvent_6 = timeSetEvent(mmTime_10000, 1, TimerCallBackFun_6, (DWORD)this, TIME_PERIODIC);
 		}
 		else
 		{
-			KillTimer(T_Periodic_10s);
+			timeKillEvent(m_idEvent_6);
+			timeEndPeriod(mmTime_10000);
 		}
 	}
 	else if(wParam == 0xFE)//Get Sample
@@ -3905,13 +3782,9 @@ void CPlugInForSaintDlg::MMTimerHandler(UINT nIDEvent)
 
 	if (Network_count2 == 5 && !FormFunc.Ctrl_SettingForm->Box_NMPDU_Send->Checked)
 	{
-		Function_Reload_DataBase();
-
-		Function_Write_DataBase(PPEI_Platform_General_Status::SysPwrMd::Start_Bit, PPEI_Platform_General_Status::SysPwrMd::Length, FormFunc.Ctrl_MainForm->Bar_SysPwrMd->Value);
-
-		Function_Build_Command(PPEI_Platform_General_Status::Basic::Message_ID, 1);
-
 		Network_count2++;
+		timeKillEvent(m_idEvent);
+		timeEndPeriod(mmTime_10);
 	}
 }
 
@@ -3970,5 +3843,5 @@ void CPlugInForSaintDlg::MMTimerHandler_5(UINT nIDEvent)
 
 void CPlugInForSaintDlg::MMTimerHandler_6(UINT nIDEvent)
 {
-
+	::SendMessage(AfxGetApp()->GetMainWnd()->GetSafeHwnd(), MESSAGE_DTC_READ, 0, 0);
 }

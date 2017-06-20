@@ -55,7 +55,6 @@ public:
 	bool					dtc_command; 
 	UINT 					SWC_Num;
 	bool 					Init15765;
-	afx_msg void			OnTimer(UINT_PTR nIDEvent);
 	afx_msg void			OnClose();
 
 	int						FUClass40[12];
