@@ -1337,7 +1337,7 @@ HRESULT CPlugInForSaintDlg::Function_HVAC_DynData(WPARAM wParam, LPARAM lParam)
 		break;
 	}
 	Function_Build_Command(ODIDynamicData_ECC::Basic::Message_ID);
-	Sleep(100);
+	
 	if(lParam != 100)
 	{
 		switch(wParam)

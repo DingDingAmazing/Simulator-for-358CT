@@ -18,3 +18,18 @@ date format---MM/DD/YYYY
 		   modify simulator name NGK Simulator For 358CT
 		   change IDD name in IDD_PLUGINFORSAINT_DIALOG
 
+6/20/2017  issue-click onto the simulator title bar and not move mouse, the simulator WM messages block.
+           1. use Multimedia timer to replace "SetTimer - OnTimer" timer;
+		   2. remove function calls:
+		      SetTimer(time_macro, time_ms, NULL), KillTimer(time_macro), OnTimer(nIDEvent);
+		   3. remove macro:
+		      Node_Alive, T_Periodic_100, T_Periodic_500, T_Periodic_5000, T_Periodic_10s, T_Periodic_640, T_Periodic_9;
+		   4. add macros:
+		      mmTime_10, mmTime_100, mmTime_500, mmTime_640, mmTime_1000, mmTime_5000, mmTime_10000;
+		   5. add function calls:
+		      timerID = timeSetEvent(uDelay, uResolution, lpTimeProc, dwUser, fuEvent), timeKillEvent(timerID), timeEndPeriod(uDelay);
+		   6. define new version as V1.9.2;
+
+6/20/2017  issue- time reminder unexpected pop up when click on the havc intialization button.
+           1. remove code "Sleep(100);"in function Function_HVAC_DynData(WPARAM wParam, LPARAM lParam);
+		   2. define new version as V1.9.3
