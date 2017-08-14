@@ -121,6 +121,7 @@ public:
 	static int				Function_Read_R_DataBase(int Start_Bit, int Length);//Red the Bin Value from Receive DataBase
 	static void				Function_Build_Command(int Message_Title);
 	static void				Function_Build_Command(int Message_Title, int Length);
+	static void				Function_Build_Command_PowerMode(int Message_Title, int Length);
 	static void				Function_Cycle_Send(int Message_Title, int Cycle_Title);
 	static CString			Function_Message_Build(int Start_Bit, int Bit, WPARAM wParam);//Build the using Message From RX/TX
 	static CString			Function_Message_SBuild(int Start_Bit, int Bit, WPARAM wParam);//Build the using Message From RX/TX

@@ -200,6 +200,27 @@ void PublicParama::Function_Build_Command(int Message_Title,int Length)
 	Function_Send_Command(Command);
 }
 
+void PublicParama::Function_Build_Command_PowerMode(int Message_Title, int Length)
+{
+	CString BitTemp, ByteTemp, Command, TitleTemp;
+	int	i_ByteTemp;
+	TitleTemp.Format(_T("%04X"), Message_Title);
+	Command = "087100006458" + TitleTemp;
+	for (int i = 0; i < Length; i++)
+	{
+		ByteTemp = "";
+		for (int j = 0; j < 8; j++)
+		{
+			BitTemp.Format("%d", DataBase[i][j]);
+			ByteTemp += BitTemp;
+		}
+		i_ByteTemp = _tcstol(ByteTemp, NULL, 2);
+		ByteTemp.Format(_T("%02X"), i_ByteTemp);
+		Command += ByteTemp;
+	}
+	Function_Send_Command(Command);
+}
+
 void PublicParama::Function_Cycle_Send(int Message_Title, int Cycle_Title)
 {//xiugai
 	

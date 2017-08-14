@@ -456,7 +456,7 @@ HRESULT CPlugInForSaintDlg::Menu_Event(WPARAM wParam, LPARAM lParam)
 		FormFunc.Ctrl_MCheckForm->Visible = FALSE;
 		FormFunc.Ctrl_PITsForm->Visible = FALSE;
 		break;
-	case 9://Read DID Button(DTC)
+	case 9://DID Button(DTC)
 		didframe->ShowWindow(SW_SHOW);
 		didframe->SetWindowPos(&CWnd::wndNoTopMost,0,0,0,0, SWP_NOSIZE|SWP_NOMOVE);
 		break;
@@ -1004,28 +1004,6 @@ HRESULT CPlugInForSaintDlg::Function_PPEI_Platform_General_Status(WPARAM wParam,
 	       }
 			
 	}
-  if(FormFunc.Ctrl_MainForm->Bar_SysPwrMd->Value == 0)
-	{       
-		  
-		//::PostThreadMessage(pThread_cycleMsg->m_nThreadID, Msg_thread_stop, 0, 0);
-		    Flag_Sleep = true;
-			Flag_Wake2 = false;
-
-			timeKillEvent(m_idEvent_1);
-			timeEndPeriod(mmTime_100);
-
-			timeKillEvent(m_idEvent_2);
-			timeEndPeriod(mmTime_500);
-
-			timeKillEvent(m_idEvent_3);
-			timeEndPeriod(mmTime_640);
-
-			timeKillEvent(m_idEvent_4);
-			timeEndPeriod(mmTime_1000);
-
-			timeKillEvent(m_idEvent_5);
-			timeEndPeriod(mmTime_5000);
-    }
 
 	if(!FormFunc.Ctrl_MainForm->Box_PMEnable->Checked)
 	{   
@@ -1039,9 +1017,16 @@ HRESULT CPlugInForSaintDlg::Function_PPEI_Platform_General_Status(WPARAM wParam,
 			m_idEvent_3 = timeSetEvent(mmTime_640, 1, TimerCallBackFun_3, (DWORD)this, TIME_PERIODIC);
 			m_idEvent_4 = timeSetEvent(mmTime_1000, 1, TimerCallBackFun_4, (DWORD)this, TIME_PERIODIC);
 			m_idEvent_5 = timeSetEvent(mmTime_5000, 1, TimerCallBackFun_5, (DWORD)this, TIME_PERIODIC);
-
+			
 			Flag_Wake = true;
 			
+		}
+
+		{
+			//Function_Send_Command("08 71 01");
+			Function_Reload_DataBase();
+			Function_Write_DataBase(PPEI_Platform_General_Status::SysPwrMd::Start_Bit, PPEI_Platform_General_Status::SysPwrMd::Length, FormFunc.Ctrl_MainForm->Bar_SysPwrMd->Value);
+			Function_Build_Command_PowerMode(PPEI_Platform_General_Status::Basic::Message_ID, 1);
 		}
 
 		Function_Reload_DataBase();
@@ -1055,9 +1040,30 @@ HRESULT CPlugInForSaintDlg::Function_PPEI_Platform_General_Status(WPARAM wParam,
 			
 		}
 	}
-	else
+
+	if (FormFunc.Ctrl_MainForm->Bar_SysPwrMd->Value == 0)
 	{
-		//Function_Send_Command("08 70 01");
+
+		//::PostThreadMessage(pThread_cycleMsg->m_nThreadID, Msg_thread_stop, 0, 0);
+		Flag_Sleep = true;
+		Flag_Wake2 = false;
+
+		timeKillEvent(m_idEvent_1);
+		timeEndPeriod(mmTime_100);
+
+		timeKillEvent(m_idEvent_2);
+		timeEndPeriod(mmTime_500);
+
+		timeKillEvent(m_idEvent_3);
+		timeEndPeriod(mmTime_640);
+
+		timeKillEvent(m_idEvent_4);
+		timeEndPeriod(mmTime_1000);
+
+		timeKillEvent(m_idEvent_5);
+		timeEndPeriod(mmTime_5000);
+
+		Function_Send_Command("08 71 01");
 	}
 	return 0;
 }
@@ -1274,7 +1280,7 @@ HRESULT CPlugInForSaintDlg::Function_Door_Action(WPARAM wParam, LPARAM lParam)
 
 void CPlugInForSaintDlg::OnClose()
 {
-	Function_Send_Command("087001");
+	Function_Send_Command("087101");
 	//::PostThreadMessage(pThread_cycleMsg->m_nThreadID, Msg_thread_stop, 0, 0);
 	DestroyWindow();     
 }
@@ -3794,7 +3800,6 @@ void CPlugInForSaintDlg::MMTimerHandler_1(UINT nIDEvent)
 	Function_Antilock_Brake_and_TC_Status_HS(0, 0);
 	Function_System_Power_Mode_Backup_BB(0, 0);
 	Function_PPEI_Vehicle_Speed_and_Distance(0, 0);
-	Function_PPEI_Platform_General_Status(0, 0);
 }
 
 void CPlugInForSaintDlg::MMTimerHandler_2(UINT nIDEvent)
