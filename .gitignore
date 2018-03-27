@@ -8,8 +8,6 @@
 *.user
 *.userosscache
 *.sln.docstates
-*.vcxproj.filters
-*.vcxproj.user
 
 # Other files
 Lib/
